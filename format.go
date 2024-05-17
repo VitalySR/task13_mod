@@ -9,16 +9,32 @@ import (
 )
 
 func Do(filePathRead string, filePathWrite string) error {
-	fileRead, err := os.Open(filePathRead)
+	ps, err := readFile(filePathRead)
 
 	if err != nil {
-		return fmt.Errorf("open file %s error: %w", filePathRead, err)
+		return err
+	}
+
+	err = writeFile(filePathWrite, ps)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func readFile(filePath string) (*[]entity.Patient, error) {
+	fileRead, err := os.Open(filePath)
+
+	if err != nil {
+		return nil, fmt.Errorf("open file %s error: %w", filePath, err)
 	}
 
 	defer func(f *os.File) {
 		err := f.Close()
 		if err != nil {
-			log.Fatalf("close file %s error: %v\n", filePathRead, err)
+			log.Fatalf("close file %s error: %v\n", filePath, err)
 		}
 	}(fileRead)
 
@@ -30,29 +46,35 @@ func Do(filePathRead string, filePathWrite string) error {
 		var p entity.Patient
 		err := dec.Decode(&p)
 		if err != nil {
-			return fmt.Errorf("decode file %s error: %w", filePathRead, err)
+			return nil, fmt.Errorf("decode file %s error: %w", filePath, err)
 		}
 		ps = append(ps, p)
 	}
 
-	log.Printf("%+v\n", ps)
+	log.Printf("Read from file: %+v\n", ps)
 
-	fileWrite, err := os.Create(filePathWrite)
+	return &ps, nil
+}
+
+func writeFile(filePath string, ps *[]entity.Patient) error {
+	fileWrite, err := os.Create(filePath)
 	defer func(fileWrite *os.File) {
 		err := fileWrite.Close()
 		if err != nil {
-			log.Fatalf("close file %s error: %v\n", filePathWrite, err)
+			log.Fatalf("close file %s error: %v\n", filePath, err)
 		}
 	}(fileWrite)
 
 	if err != nil {
-		return fmt.Errorf("create file %s error: %w", filePathWrite, err)
+		return fmt.Errorf("create file %s error: %w", filePath, err)
 	}
 
 	err = json.NewEncoder(fileWrite).Encode(ps)
 	if err != nil {
-		return fmt.Errorf("encode file %s error: %w", filePathWrite, err)
+		return fmt.Errorf("encode file %s error: %w", filePath, err)
 	}
+
+	log.Printf("End of write to file %s\n", filePath)
 
 	return nil
 }
