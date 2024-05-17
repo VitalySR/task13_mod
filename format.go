@@ -18,7 +18,7 @@ func Do(filePathRead string, filePathWrite string) error {
 	defer func(f *os.File) {
 		err := f.Close()
 		if err != nil {
-			log.Fatalf("close file %s error: %v\n", f.Name(), err)
+			log.Fatalf("close file %s error: %v\n", filePathRead, err)
 		}
 	}(fileRead)
 
@@ -35,7 +35,24 @@ func Do(filePathRead string, filePathWrite string) error {
 		ps = append(ps, p)
 	}
 
-	log.Println(ps)
+	log.Printf("%+v\n", ps)
+
+	fileWrite, err := os.Create(filePathWrite)
+	defer func(fileWrite *os.File) {
+		err := fileWrite.Close()
+		if err != nil {
+			log.Fatalf("close file %s error: %v\n", filePathWrite, err)
+		}
+	}(fileWrite)
+
+	if err != nil {
+		return fmt.Errorf("create file %s error: %w", filePathWrite, err)
+	}
+
+	err = json.NewEncoder(fileWrite).Encode(ps)
+	if err != nil {
+		return fmt.Errorf("encode file %s error: %w", filePathWrite, err)
+	}
 
 	return nil
 }
