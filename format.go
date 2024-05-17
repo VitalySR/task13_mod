@@ -1,11 +1,13 @@
 package format
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"github.com/VitalySR/task13_mod/internal/entity"
 	"log"
 	"os"
+	"slices"
 )
 
 func Do(filePathRead string, filePathWrite string) error {
@@ -15,7 +17,11 @@ func Do(filePathRead string, filePathWrite string) error {
 		return err
 	}
 
-	err = writeFile(filePathWrite, ps)
+	slices.SortFunc(ps, func(a, b entity.Patient) int {
+		return cmp.Compare(a.Age, b.Age)
+	})
+
+	err = writeFile(filePathWrite, &ps)
 
 	if err != nil {
 		return err
@@ -24,7 +30,7 @@ func Do(filePathRead string, filePathWrite string) error {
 	return nil
 }
 
-func readFile(filePath string) (*[]entity.Patient, error) {
+func readFile(filePath string) ([]entity.Patient, error) {
 	fileRead, err := os.Open(filePath)
 
 	if err != nil {
@@ -53,7 +59,7 @@ func readFile(filePath string) (*[]entity.Patient, error) {
 
 	log.Printf("Read from file: %+v\n", ps)
 
-	return &ps, nil
+	return ps, nil
 }
 
 func writeFile(filePath string, ps *[]entity.Patient) error {
