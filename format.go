@@ -38,7 +38,7 @@ func readFile(filePath string) (*[]entity.Patient, error) {
 		}
 	}(fileRead)
 
-	var ps = make([]entity.Patient, 0, 4)
+	var ps = make([]entity.Patient, 0, 3)
 
 	dec := json.NewDecoder(fileRead)
 
