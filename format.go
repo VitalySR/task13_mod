@@ -1,27 +1,28 @@
 package format
 
 import (
-	"cmp"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"github.com/VitalySR/task13_mod/internal/entity"
 	"log"
 	"os"
-	"slices"
 )
 
 func Do(filePathRead string, filePathWrite string) error {
-	var ps = make([]entity.Patient, 0, 3)
+	var ps = entity.Patients{
+		List: make([]entity.Patient, 0, 3),
+	}
 
-	err := readFile(filePathRead, &ps)
+	err := readFile(filePathRead, &ps.List)
 
 	if err != nil {
 		return err
 	}
 
-	slices.SortFunc(ps, func(a, b entity.Patient) int {
-		return cmp.Compare(a.Age, b.Age)
-	})
+	//slices.SortFunc(ps, func(a, b entity.Patient) int {
+	//	return cmp.Compare(a.Age, b.Age)
+	//})
 
 	err = writeFile(filePathWrite, &ps)
 
@@ -62,7 +63,7 @@ func readFile(filePath string, ps *[]entity.Patient) error {
 	return nil
 }
 
-func writeFile(filePath string, ps *[]entity.Patient) error {
+func writeFile(filePath string, ps *entity.Patients) error {
 	fileWrite, err := os.Create(filePath)
 	defer func(fileWrite *os.File) {
 		err := fileWrite.Close()
@@ -75,7 +76,14 @@ func writeFile(filePath string, ps *[]entity.Patient) error {
 		return fmt.Errorf("create file %s error: %w", filePath, err)
 	}
 
-	err = json.NewEncoder(fileWrite).Encode(ps)
+	_, err = fileWrite.WriteString(xml.Header)
+	if err != nil {
+		return fmt.Errorf("encode file %s error: %w", filePath, err)
+	}
+
+	enc := xml.NewEncoder(fileWrite)
+	enc.Indent("", "\t")
+	err = enc.Encode(ps)
 	if err != nil {
 		return fmt.Errorf("encode file %s error: %w", filePath, err)
 	}
