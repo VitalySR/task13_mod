@@ -1,12 +1,14 @@
 package format
 
 import (
+	"cmp"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"github.com/VitalySR/task13_mod/v2/internal/entity"
 	"log"
 	"os"
+	"slices"
 )
 
 func Do(filePathRead string, filePathWrite string) error {
@@ -20,9 +22,9 @@ func Do(filePathRead string, filePathWrite string) error {
 		return err
 	}
 
-	//slices.SortFunc(ps, func(a, b entity.Patient) int {
-	//	return cmp.Compare(a.Age, b.Age)
-	//})
+	slices.SortFunc(ps.List, func(a, b entity.Patient) int {
+		return cmp.Compare(a.Age, b.Age)
+	})
 
 	err = writeFile(filePathWrite, &ps)
 
