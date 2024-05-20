@@ -11,7 +11,9 @@ import (
 )
 
 func Do(filePathRead string, filePathWrite string) error {
-	ps, err := readFile(filePathRead)
+	var ps = make([]entity.Patient, 0, 3)
+
+	err := readFile(filePathRead, &ps)
 
 	if err != nil {
 		return err
@@ -30,11 +32,11 @@ func Do(filePathRead string, filePathWrite string) error {
 	return nil
 }
 
-func readFile(filePath string) ([]entity.Patient, error) {
+func readFile(filePath string, ps *[]entity.Patient) error {
 	fileRead, err := os.Open(filePath)
 
 	if err != nil {
-		return nil, fmt.Errorf("open file %s error: %w", filePath, err)
+		return fmt.Errorf("open file %s error: %w", filePath, err)
 	}
 
 	defer func(f *os.File) {
@@ -44,22 +46,20 @@ func readFile(filePath string) ([]entity.Patient, error) {
 		}
 	}(fileRead)
 
-	var ps = make([]entity.Patient, 0, 3)
-
 	dec := json.NewDecoder(fileRead)
 
 	for dec.More() {
 		var p entity.Patient
 		err := dec.Decode(&p)
 		if err != nil {
-			return nil, fmt.Errorf("decode file %s error: %w", filePath, err)
+			return fmt.Errorf("decode file %s error: %w", filePath, err)
 		}
-		ps = append(ps, p)
+		*ps = append(*ps, p)
 	}
 
 	log.Printf("Read from file: %+v\n", ps)
 
-	return ps, nil
+	return nil
 }
 
 func writeFile(filePath string, ps *[]entity.Patient) error {
