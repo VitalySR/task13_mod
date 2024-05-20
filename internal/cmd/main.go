@@ -1,7 +1,7 @@
 package main
 
 import (
-	format "github.com/VitalySR/task13_mod"
+	format "github.com/VitalySR/task13_mod/v2"
 	"log"
 )
 

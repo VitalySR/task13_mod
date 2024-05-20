@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"github.com/VitalySR/task13_mod/internal/entity"
+	"github.com/VitalySR/task13_mod/v2/internal/entity"
 	"log"
 	"os"
 )
